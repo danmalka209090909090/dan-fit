@@ -101,7 +101,6 @@ def delete_pr(pr_id):
     conn.commit()
     conn.close()
 
-# אתחול הנתונים בריצה ראשונה
 init_db()
 if "db_initialized" not in st.session_state:
     w, b, items = load_today_data()
@@ -123,7 +122,6 @@ if "shopping_list" not in st.session_state:
         {"item": "שמן זית כתית מעולה", "search": "שמן זית", "checked": False}
     ]
 
-# עיצוב ונראות
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Rubik:wght@400;600;700;800;900&display=swap');
@@ -187,24 +185,6 @@ st.markdown("""
         max-width: 800px;
         margin: 12px auto 18px auto;
         line-height: 1.6;
-    }
-
-    .brand-badges {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .badge-pill {
-        background-color: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: #334155;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 0.88rem;
-        font-weight: 700;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
 
     .card-box {
@@ -305,7 +285,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# בס"ד
 st.markdown("""
 <div class="top-header-bar">
     <span class="bsd-badge">בס״ד</span>
@@ -349,8 +328,8 @@ st.markdown("""
     <div class="brand-title">⚡ <span>DaniFit</span> Pro</div>
     <div class="brand-subtitle">הפלטפורמה המקצועית והחכמה לתזונה, חיטוב וכושר שיא</div>
     <div class="brand-description">
-        מערכת מתקדמת עם שמירת נתונים קבועה: מעקב קלוריות חכם וסוגר פינות, סריקת מנות במצלמת AI,
-        הכנת עגלת קניות לשופרסל, כרטיסיית הישגים לסטורי, סעודות שבת ומרכז אימוני כוח.
+        מערכת מתקדמת עם שמירת נתונים קבועה: מעקב קלוריות חכם, סריקת מנות במצלמת AI,
+        בוט עגלה לשופרסל, כרטיסיית הישגים לסטורי, סעודות שבת ומרכז אימוני כוח.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -685,10 +664,10 @@ with tab_shabbat:
         f = round(data["f"] * shab_qty, 1)
         st.info(f"ערכי המנה: **{cal} קק\"ל** | חלבון: **{p}g** | פחמימות: **{c}g** | שומן: **{f}g**")
 
-# --- טאב 7: רשימת קניות לשופרסל ---
+# --- טאב 7: רשימת קניות ובוט מילוי עגלה לשופרסל ---
 with tab_shopping:
-    st.subheader("🛒 רשימת קניות חכמה והכנת עגלה אוטומטית")
-    st.caption("סמן את המצרכים שאתה צריך, והמערכת תכין את העגלה בשופרסל בלחיצה אחת!")
+    st.subheader("🛒 רשימת קניות ובוט מילוי עגלה לשופרסל")
+    st.caption("סמן מוצרים והפעל את הבוט שמכניס אותם אוטומטית לעגלה באתר שופרסל!")
 
     with st.expander("➕ הוסף מוצר חדש לרשימה", expanded=False):
         n_c1, n_c2 = st.columns([3, 1])
@@ -736,52 +715,72 @@ with tab_shopping:
     st.markdown("---")
 
     if selected_items:
-        items_text_lines = "\\n".join(selected_items)
-        shufersal_quick_order_url = "https://www.shufersal.co.il/online/he/wish-lists"
-        
+        items_json_str = json.dumps(selected_items, ensure_ascii=False)
+        bot_script = f"""javascript:(async function(){{
+            const items = {items_json_str};
+            alert('🤖 בוט DaniFit מתחיל להוסיף ' + items.length + ' מוצרים לעגלה בשופרסל...');
+            for (let i = 0; i < items.length; i++) {{
+                const item = items[i];
+                try {{
+                    const searchRes = await fetch('/online/he/search/results?q=' + encodeURIComponent(item));
+                    const text = await searchRes.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'text/html');
+                    const addBtn = doc.querySelector('.miglog-prod-buy-btn') || doc.querySelector('[data-product-code]');
+                    if (addBtn) {{
+                        const prodCode = addBtn.getAttribute('data-product-code') || addBtn.id;
+                        await fetch('/online/he/cart/add', {{
+                            method: 'POST',
+                            headers: {{'Content-Type': 'application/x-www-form-urlencoded'}},
+                            body: 'productCodePost=' + prodCode + '&quantity=1'
+                        }});
+                    }}
+                }} catch(e) {{}}
+            }}
+            alert('🎉 כל המוצרים הוכנסו לעגלה בהצלחה!');
+            location.reload();
+        }})();"""
+
         st.markdown(f"**נבחרו {len(selected_items)} מוצרים להזמנה:**")
         st.info(", ".join(selected_items))
 
         magic_button_html = f"""
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
-            <button onclick="
-                navigator.clipboard.writeText(`{items_text_lines}`);
-                alert('הרשימה הועתקה! בלשונית שופרסל שתיפתח - לחץ הדבק (Paste) והעגלה תתמלא אוטומטית.');
-                window.open('{shufersal_quick_order_url}', '_blank');
-            " style="
-                background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-                color: white;
-                border: none;
-                padding: 14px 24px;
-                font-size: 1.1rem;
-                font-weight: 800;
-                border-radius: 12px;
-                cursor: pointer;
-                box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
-                font-family: inherit;
-            ">
-                🚀 הכן עגלה מהירה בשופרסל בלחיצה
-            </button>
-            
-            <a href="https://wa.me/?text={urllib.parse.quote('רשימת קניות מ-DaniFit:\\n' + chr(10).join(selected_items))}" target="_blank" style="
-                background: #25d366;
-                color: white;
-                text-decoration: none;
-                padding: 14px 20px;
-                font-size: 1.05rem;
-                font-weight: 700;
-                border-radius: 12px;
-                display: inline-flex;
-                align-items: center;
-                box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
-            ">
-                📲 שלח רשימה לוואטסאפ
-            </a>
+        <div style="margin-top: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 18px; border-radius: 14px;">
+            <h4 style="margin: 0 0 8px 0; color: #166534;">🤖 בוט אוטומטי למילוי העגלה בשופרסל</h4>
+            <p style="margin: 0 0 14px 0; font-size: 0.95rem; color: #374151;">
+                1. גרור את הכפתור הירוק אל <b>סרגל הסימניות (Bookmarks)</b> בדפדפן.<br>
+                2. פתח את אתר שופרסל ולחץ על הסימנייה — הבוט יוסיף את כל המוצרים ישירות לסל!
+            </p>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <a href="{bot_script}" style="
+                    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+                    color: white;
+                    text-decoration: none;
+                    padding: 12px 20px;
+                    font-size: 1.05rem;
+                    font-weight: 800;
+                    border-radius: 10px;
+                    display: inline-block;
+                    cursor: grab;
+                    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+                ">⚡ גרור אותי לסימניות: הוסף לעגלה בשופרסל</a>
+
+                <a href="https://www.shufersal.co.il/online/he/" target="_blank" style="
+                    background: #2563eb;
+                    color: white;
+                    text-decoration: none;
+                    padding: 12px 20px;
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    border-radius: 10px;
+                    display: inline-block;
+                ">🛒 פתח את אתר שופרסל</a>
+            </div>
         </div>
         """
-        components.html(magic_button_html, height=85)
+        components.html(magic_button_html, height=180)
     else:
-        st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין עגלה!")
+        st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להפעיל את הבוט!")
 
 # --- טאב 8: מרכז אימונים ו-PR ---
 with tab_workout:
