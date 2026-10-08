@@ -42,7 +42,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS shopping_list (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             item TEXT,
-            code TEXT,
+            search TEXT,
             checked INTEGER
         )
     """)
@@ -110,17 +110,16 @@ if "db_initialized" not in st.session_state:
     st.session_state.db_initialized = True
 
 if "shopping_list" not in st.session_state:
-    # מוצרים עם מק"טים רשמיים משופרסל Online למילוי עגלה מובנה
     st.session_state.shopping_list = [
-        {"item": "חזה עוף טרי (1 ק״ג)", "code": "P_7290000000001", "checked": True},
-        {"item": "טונה סטארקיסט במים (רביעייה)", "code": "P_7290000570023", "checked": True},
-        {"item": "יוגורט חלבון PRO 20g דנונה", "code": "P_7290104721464", "checked": True},
-        {"item": "גבינת קוטג' 5% תנובה", "code": "P_7290000045552", "checked": True},
-        {"item": "תבנית 12 ביצים L", "code": "P_7290000062405", "checked": True},
-        {"item": "אורז בסמטי קלאסי 1 ק״ג", "code": "P_7290000061217", "checked": True},
-        {"item": "שיבולת שועל דקה קוואקר", "code": "P_7290000065406", "checked": False},
-        {"item": "טורטיות מקמח מלא", "code": "P_7290000084322", "checked": False},
-        {"item": "שמן זית כתית מעולה", "code": "P_7290000098711", "checked": False}
+        {"item": "חזה עוף", "search": "חזה עוף", "checked": True},
+        {"item": "טונה במים", "search": "טונה במים", "checked": True},
+        {"item": "יוגורט פרו", "search": "יוגורט פרו", "checked": True},
+        {"item": "קוטג 5", "search": "קוטג 5", "checked": True},
+        {"item": "ביצים L", "search": "ביצים L", "checked": True},
+        {"item": "אורז בסמטי", "search": "אורז בסמטי", "checked": True},
+        {"item": "שיבולת שועל", "search": "שיבולת שועל", "checked": False},
+        {"item": "טורטיות", "search": "טורטיות", "checked": False},
+        {"item": "שמן זית", "search": "שמן זית", "checked": False}
     ]
 
 st.markdown("""
@@ -314,7 +313,7 @@ FOOD_DATABASE = {
 }
 
 SHABBAT_FOOD_DB = {
-    "כוסית ייין קידוש / תירוש (100 מ״ל)": {"cal": 85, "p": 0.2, "c": 18.0, "f": 0.0},
+    "כוסית יין קידוש / תירוש (100 מ״ל)": {"cal": 85, "p": 0.2, "c": 18.0, "f": 0.0},
     "פרוסת חלת שבת (50 גרם)": {"cal": 145, "p": 4.5, "c": 26.0, "f": 2.5},
     "מנת דג חריף (אמנון ברוטב, 150 גרם)": {"cal": 210, "p": 28.0, "c": 4.0, "f": 9.0},
     "מנת פילה סלמון עשבי תיבול (150 גרם)": {"cal": 310, "p": 30.0, "c": 0.0, "f": 20.0},
@@ -665,15 +664,15 @@ with tab_shabbat:
         f = round(data["f"] * shab_qty, 1)
         st.info(f"ערכי המנה: **{cal} קק\"ל** | חלבון: **{p}g** | פחמימות: **{c}g** | שומן: **{f}g**")
 
-# --- טאב 7: רשימת קניות והכנת עגלה ישירה לשופרסל ---
+# --- טאב 7: רשימת קניות והזמנה מהירה לשופרסל ---
 with tab_shopping:
-    st.subheader("🛒 רשימת קניות והכנת עגלה ישירה לשופרסל")
-    st.caption("סמן את המוצרים ולחץ על הכפתור כדי לשלוח אותם ישירות לעגלה בשופרסל Online!")
+    st.subheader("🛒 רשימת קניות והזמנה מהירה לשופרסל")
+    st.caption("סמן את המוצרים ולחץ על כפתור ההזמנה המהירה:")
 
     with st.expander("➕ הוסף מוצר חדש לרשימה", expanded=False):
         n_c1, n_c2 = st.columns([3, 1])
         with n_c1:
-            new_item_name = st.text_input("שם המוצר:", placeholder="לדוגמה: יוגורט דנונה פרו 20 גרם", key="new_shop_inp")
+            new_item_name = st.text_input("שם המוצר:", placeholder="לדוגמה: יוגורט פרו", key="new_shop_inp")
         with n_c2:
             st.write("")
             st.write("")
@@ -681,7 +680,7 @@ with tab_shopping:
                 if new_item_name.strip():
                     st.session_state.shopping_list.append({
                         "item": new_item_name.strip(),
-                        "code": urllib.parse.quote(new_item_name.strip()),
+                        "search": new_item_name.strip(),
                         "checked": True
                     })
                     st.rerun()
@@ -707,7 +706,7 @@ with tab_shopping:
             is_chk = st.checkbox(shop_item["item"], value=shop_item["checked"], key=f"shop_chk_{idx}")
             st.session_state.shopping_list[idx]["checked"] = is_chk
             if is_chk:
-                selected_items.append(shop_item)
+                selected_items.append(shop_item["search"])
         with c_del:
             if st.button("🗑️", key=f"del_shop_{idx}"):
                 st.session_state.shopping_list.pop(idx)
@@ -716,20 +715,19 @@ with tab_shopping:
     st.markdown("---")
 
     if selected_items:
-        st.markdown(f"**נבחרו {len(selected_items)} מוצרים להעברה לעגלה:**")
-        st.info(", ".join([x["item"] for x in selected_items]))
+        items_payload = ",".join(selected_items)
+        shufersal_order_url = f"https://www.shufersal.co.il/online/he/quick-order?items={urllib.parse.quote(items_payload)}"
 
-        # קישור עגלה רשמי שפותח את שופרסל עם כל המוצרים המבוקשים
-        search_terms = "%20".join([urllib.parse.quote(x['item']) for x in selected_items[:3]])
-        shufersal_direct_url = f"https://www.shufersal.co.il/online/he/search?text={search_terms}"
+        st.markdown(f"**נבחרו {len(selected_items)} מוצרים:**")
+        st.info(", ".join(selected_items))
 
         st.markdown(f"""
         <div style="margin-top: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 14px; text-align: center;">
-            <h3 style="margin: 0 0 10px 0; color: #166534; border: none; padding: 0;">🚀 העגלה מוכנה לשליחה!</h3>
+            <h3 style="margin: 0 0 10px 0; color: #166534; border: none; padding: 0;">🚀 הזמנה ישירה לשופרסל</h3>
             <p style="margin: 0 0 16px 0; color: #374151; font-size: 1.05rem;">
-                לחיצה אחת תפתח את שופרסל Online ישירות עם כל המוצרים שלך מוכנים להזמנה:
+                לחיצה תעביר את כל המוצרים ישירות לעמוד ההזמנה המהירה של שופרסל:
             </p>
-            <a href="{shufersal_direct_url}" target="_blank" style="
+            <a href="{shufersal_order_url}" target="_blank" style="
                 background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
                 color: white;
                 text-decoration: none;
@@ -739,12 +737,11 @@ with tab_shopping:
                 border-radius: 14px;
                 display: inline-block;
                 box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35);
-                transition: transform 0.2s ease;
-            ">🛒 לחץ כאן להכנת העגלה בשופרסל עכשיו</a>
+            ">🛒 פתח עגלה מהירה בשופרסל</a>
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין את העגלה!")
+        st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין עגלה!")
 
 # --- טאב 8: מרכז אימונים ו-PR ---
 with tab_workout:
