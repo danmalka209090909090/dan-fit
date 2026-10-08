@@ -101,7 +101,7 @@ def delete_pr(pr_id):
     conn.commit()
     conn.close()
 
-# אתחול נתונים
+# אתחול הנתונים בריצה ראשונה
 init_db()
 if "db_initialized" not in st.session_state:
     w, b, items = load_today_data()
@@ -123,7 +123,7 @@ if "shopping_list" not in st.session_state:
         {"item": "שמן זית כתית מעולה", "search": "שמן זית", "checked": False}
     ]
 
-# עיצוב ונראות
+# עיצוב בהיר ונקי (Light Mode)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Rubik:wght@400;600;700;800;900&display=swap');
@@ -324,14 +324,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# בס"ד
+# כיתוב בס"ד
 st.markdown("""
 <div class="top-header-bar">
     <span class="bsd-badge">בס״ד</span>
 </div>
 """, unsafe_allow_html=True)
 
-# מאגר מזונות בסיסי
+# מאגר מזונות
 FOOD_DATABASE = {
     "חזה עוף צלוי": {"cal": 165, "p": 31.0, "c": 0.0, "f": 3.6, "unit": "100 גרם"},
     "פילה דג סלמון": {"cal": 208, "p": 20.0, "c": 0.0, "f": 13.0, "unit": "100 גרם"},
@@ -431,7 +431,7 @@ setInterval(() => {
 """
 components.html(motivation_html, height=75)
 
-# הטאבים
+# 8 טאבים
 tab_bmi, tab_nutrition, tab_ai_cam, tab_story, tab_warmup, tab_shabbat, tab_shopping, tab_workout = st.tabs([
     "📊 מחשבון מדדים ותפריט",
     "🥗 יומן ומעקב קלוריות חכם",
@@ -443,7 +443,7 @@ tab_bmi, tab_nutrition, tab_ai_cam, tab_story, tab_warmup, tab_shabbat, tab_shop
     "🏋️ מרכז אימונים וכוח"
 ])
 
-# --- טאב 1: מחשבון מדדים ותפריט ---
+# --- טאב 1: מדדים ותפריט ---
 with tab_bmi:
     st.subheader("📊 אבחון מדדים אישי ובניית תפריט מדויק")
     col1, col2, col3 = st.columns(3)
@@ -666,8 +666,19 @@ with tab_ai_cam:
                             "f": 2.0
                         }
                         """
-                        res = client.models.generate_content(
-model="gemini-3.5-flash-lite",                        )
+                        # קריאה למודל gemini-3.8-flash עם מנגנון גיבוי לעומס שרתים (503)
+                        try:
+                            res = client.models.generate_content(
+                                model="gemini-3.8-flash",
+                                contents=[prompt, pil_img]
+                            )
+                        except Exception as e_inner:
+                            time.sleep(1)
+                            res = client.models.generate_content(
+                                model="gemini-3.5-flash",
+                                contents=[prompt, pil_img]
+                            )
+
                         cleaned = res.text.strip().replace("```json", "").replace("```", "").strip()
                         food_info = json.loads(cleaned)
                         st.session_state["scanned_ai_dish"] = food_info
