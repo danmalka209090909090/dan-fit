@@ -112,18 +112,18 @@ if "db_initialized" not in st.session_state:
 
 if "shopping_list" not in st.session_state:
     st.session_state.shopping_list = [
-        {"item": "חזה עוף טרי (1 ק״ג)", "search": "חזה עוף", "checked": False},
-        {"item": "טונה במים (4 קופסאות)", "search": "טונה במים", "checked": False},
-        {"item": "יוגורט חלבון PRO 20g", "search": "יוגורט פרו", "checked": False},
-        {"item": "גבינת קוטג' 5%", "search": "קוטג 5", "checked": False},
-        {"item": "תבנית ביצים L", "search": "ביצים L", "checked": False},
-        {"item": "אורז בסמטי (1 ק״ג)", "search": "אורז בסמטי", "checked": False},
+        {"item": "חזה עוף טרי (1 ק״ג)", "search": "חזה עוף", "checked": True},
+        {"item": "טונה במים (4 קופסאות)", "search": "טונה במים", "checked": True},
+        {"item": "יוגורט חלבון PRO 20g", "search": "יוגורט פרו", "checked": True},
+        {"item": "גבינת קוטג' 5%", "search": "קוטג 5", "checked": True},
+        {"item": "תבנית ביצים L", "search": "ביצים L", "checked": True},
+        {"item": "אורז בסמטי (1 ק״ג)", "search": "אורז בסמטי", "checked": True},
         {"item": "שיבולת שועל דקה", "search": "שיבולת שועל", "checked": False},
         {"item": "טורטיות מקמח מלא", "search": "טורטיות", "checked": False},
         {"item": "שמן זית כתית מעולה", "search": "שמן זית", "checked": False}
     ]
 
-# עיצוב בהיר ונקי (Light Mode)
+# עיצוב ונראות
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Rubik:wght@400;600;700;800;900&display=swap');
@@ -245,25 +245,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    .quick-shop-btn {
-        display: inline-block;
-        text-align: center;
-        background: #eff6ff;
-        color: #2563eb !important;
-        border: 1px solid #bfdbfe;
-        padding: 6px 14px;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.88rem;
-        text-decoration: none;
-        transition: 0.2s;
-    }
-
-    .quick-shop-btn:hover {
-        background: #2563eb;
-        color: #ffffff !important;
-    }
-
     h1, h2, h3, .stSubheader {
         color: #0f172a !important;
         font-weight: 800 !important;
@@ -324,14 +305,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# כיתוב בס"ד
+# בס"ד
 st.markdown("""
 <div class="top-header-bar">
     <span class="bsd-badge">בס״ד</span>
 </div>
 """, unsafe_allow_html=True)
 
-# מאגר מזונות
 FOOD_DATABASE = {
     "חזה עוף צלוי": {"cal": 165, "p": 31.0, "c": 0.0, "f": 3.6, "unit": "100 גרם"},
     "פילה דג סלמון": {"cal": 208, "p": 20.0, "c": 0.0, "f": 13.0, "unit": "100 גרם"},
@@ -353,7 +333,6 @@ FOOD_DATABASE = {
     "אבוקדו": {"cal": 160, "p": 2.0, "c": 8.5, "f": 14.5, "unit": "חצי פרי"}
 }
 
-# מאגר שבת
 SHABBAT_FOOD_DB = {
     "כוסית יין קידוש / תירוש (100 מ״ל)": {"cal": 85, "p": 0.2, "c": 18.0, "f": 0.0},
     "פרוסת חלת שבת (50 גרם)": {"cal": 145, "p": 4.5, "c": 26.0, "f": 2.5},
@@ -365,73 +344,17 @@ SHABBAT_FOOD_DB = {
     "צלחת סלטי שבת מבושלים (3 כפות)": {"cal": 130, "p": 1.8, "c": 9.0, "f": 10.0}
 }
 
-# כותרת ראשית
 st.markdown("""
 <div class="brand-header">
     <div class="brand-title">⚡ <span>DaniFit</span> Pro</div>
     <div class="brand-subtitle">הפלטפורמה המקצועית והחכמה לתזונה, חיטוב וכושר שיא</div>
     <div class="brand-description">
         מערכת מתקדמת עם שמירת נתונים קבועה: מעקב קלוריות חכם וסוגר פינות, סריקת מנות במצלמת AI,
-        הזמנת קניות בלחיצה לסופר, כרטיסיית הישגים שבועית לסטורי, סעודות שבת ומרכז אימוני כוח וריצה.
-    </div>
-    <div class="brand-badges">
-        <span class="badge-pill">💾 שמירת נתונים קבועה (SQLite)</span>
-        <span class="badge-pill">📸 סורק AI חכם (Gemini Vision)</span>
-        <span class="badge-pill">🛒 הזמנת קניות בלחיצה לסופר</span>
-        <span class="badge-pill">📲 כרטיסיית סיכום שבועית לסטורי</span>
-        <span class="badge-pill">🧘 סדרת חימום ומתיחות</span>
+        הכנת עגלת קניות לשופרסל, כרטיסיית הישגים לסטורי, סעודות שבת ומרכז אימוני כוח.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# באנר מוטיבציה מתחלף
-motivation_html = """
-<div style="
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    border: 1px solid #38bdf8;
-    border-radius: 14px;
-    padding: 12px 20px;
-    text-align: center;
-    margin-bottom: 22px;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.15);
-">
-    <span style="font-size: 1.2rem; margin-left: 8px;">🔥</span>
-    <span id="mot-quote" style="
-        font-family: 'Assistant', 'Rubik', sans-serif;
-        font-size: 1.12rem;
-        font-weight: 800;
-        color: #38bdf8;
-        transition: opacity 0.5s ease-in-out;
-    ">המשכיות מנצחת כישרון בכל יום.</span>
-</div>
-
-<script>
-const quotes = [
-    "המשכיות מנצחת כישרון בכל יום. 🔥",
-    "התוצאות שאתה רוצה מחר תלויות במה שתעשה היום. ⚡",
-    "אל תוותר על מה שאתה הכי רוצה בשביל מה שבא לך עכשיו. 🏆",
-    "משמעת עצמית זה לבחור בין מה שקל עכשיו למה שמשתלם אחר כך. 💪",
-    "קילומטר אחד יותר, עוד סט אחד – שם קורה השינוי. 🏃",
-    "ההבדל בין מטרה לחלום זה תוכנית עבודה מדויקת. 🎯"
-];
-let qIndex = 0;
-const qElem = document.getElementById("mot-quote");
-
-setInterval(() => {
-    if (qElem) {
-        qElem.style.opacity = 0;
-        setTimeout(() => {
-            qIndex = (qIndex + 1) % quotes.length;
-            qElem.innerText = quotes[qIndex];
-            qElem.style.opacity = 1;
-        }, 500);
-    }
-}, 6000);
-</script>
-"""
-components.html(motivation_html, height=75)
-
-# 8 טאבים
 tab_bmi, tab_nutrition, tab_ai_cam, tab_story, tab_warmup, tab_shabbat, tab_shopping, tab_workout = st.tabs([
     "📊 מחשבון מדדים ותפריט",
     "🥗 יומן ומעקב קלוריות חכם",
@@ -510,7 +433,7 @@ with tab_bmi:
     if "saved_menu_text" in st.session_state:
         st.text_area("📋 התוכנית שהופקה:", value=st.session_state["saved_menu_text"], height=200)
 
-# --- טאב 2: יומן קלוריות חכם ---
+# --- טאב 2: יומן קלוריות ---
 with tab_nutrition:
     st.subheader("🥗 יומן מעקב קלוריות ומאקרו בזמן אמת (נשמר אוטומטית)")
 
@@ -634,7 +557,7 @@ with tab_nutrition:
             st.markdown("- מומלץ: 150 גרם גבינת קוטג' 5% עם תפוח עץ.")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# --- טאב 3: סורק AI אמיתי (Gemini Vision) ---
+# --- טאב 3: סורק AI ---
 with tab_ai_cam:
     st.subheader("📸 סורק AI חכם לתזונה (Gemini Vision)")
     st.caption("צלם כל מוצר, משקה, תווית ערכים או צלחת אוכל, וה-AI יזהה ויחלץ את הערכים ישירות ליומן.")
@@ -666,13 +589,12 @@ with tab_ai_cam:
                             "f": 2.0
                         }
                         """
-                        # קריאה למודל gemini-3.8-flash עם מנגנון גיבוי לעומס שרתים (503)
                         try:
                             res = client.models.generate_content(
                                 model="gemini-3.8-flash",
                                 contents=[prompt, pil_img]
                             )
-                        except Exception as e_inner:
+                        except Exception:
                             time.sleep(1)
                             res = client.models.generate_content(
                                 model="gemini-3.5-flash",
@@ -713,11 +635,9 @@ with tab_ai_cam:
                 time.sleep(1)
                 st.rerun()
 
-# --- טאב 4: כרטיסיית סטורי שבועית ---
+# --- טאב 4: כרטיסיית סטורי ---
 with tab_story:
     st.subheader("📲 הפקת כרטיסיית הישגים שבועית לסטורי")
-    st.caption("הפק תמונה מעוצבת לשיתוף באינסטגרם / וואטסאפ.")
-    
     st.markdown("""
     <div class="story-card">
         <h2 style="color: #38bdf8; margin: 0; font-size: 2rem;">⚡ DANIFIT PRO</h2>
@@ -751,11 +671,9 @@ with tab_warmup:
         </div>
         """, unsafe_allow_html=True)
 
-# --- טאב 6: מחשבון סעודות שבת ---
+# --- טאב 6: מחשבון שבת ---
 with tab_shabbat:
     st.subheader("🕯️ מחשבון שבת קודש חכם")
-    st.caption("שמור על המאקרו והמשקל גם בארוחות השבת והחגים.")
-
     shab_food = st.selectbox("בחר מנת שבת:", list(SHABBAT_FOOD_DB.keys()))
     shab_qty = st.number_input("כמות מנות:", min_value=1.0, max_value=5.0, value=1.0, step=0.5)
 
@@ -767,12 +685,11 @@ with tab_shabbat:
         f = round(data["f"] * shab_qty, 1)
         st.info(f"ערכי המנה: **{cal} קק\"ל** | חלבון: **{p}g** | פחמימות: **{c}g** | שומן: **{f}g**")
 
-# --- טאב 7: רשימת קניות לסופר ---# --- טאב 7: רשימת קניות חכמה והכנת עגלה לשופרסל ---
+# --- טאב 7: רשימת קניות לשופרסל ---
 with tab_shopping:
     st.subheader("🛒 רשימת קניות חכמה והכנת עגלה אוטומטית")
     st.caption("סמן את המצרכים שאתה צריך, והמערכת תכין את העגלה בשופרסל בלחיצה אחת!")
 
-    # הוספת מוצר חדש לרשימה
     with st.expander("➕ הוסף מוצר חדש לרשימה", expanded=False):
         n_c1, n_c2 = st.columns([3, 1])
         with n_c1:
@@ -789,7 +706,6 @@ with tab_shopping:
                     })
                     st.rerun()
 
-    # הצגת המוצרים עם תיבות סימון
     col_sel_all, col_desel_all = st.columns(2)
     with col_sel_all:
         if st.button("✅ בחר הכל"):
@@ -819,7 +735,6 @@ with tab_shopping:
 
     st.markdown("---")
 
-    # ריכוז המוצרים שנבחרו להזמנה
     if selected_items:
         items_text_lines = "\\n".join(selected_items)
         shufersal_quick_order_url = "https://www.shufersal.co.il/online/he/wish-lists"
@@ -827,12 +742,11 @@ with tab_shopping:
         st.markdown(f"**נבחרו {len(selected_items)} מוצרים להזמנה:**")
         st.info(", ".join(selected_items))
 
-        # כפתור חכם שמבצע העתקה ומעביר לעמוד הכנת הרשימה של שופרסל
         magic_button_html = f"""
         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
             <button onclick="
                 navigator.clipboard.writeText(`{items_text_lines}`);
-                alert('הרשימה הועתקה ללוח! בלשונית שופרסל שתיפתח - לחץ הדבק (Paste) והעגלה תתמלא אוטומטית.');
+                alert('הרשימה הועתקה! בלשונית שופרסל שתיפתח - לחץ הדבק (Paste) והעגלה תתמלא אוטומטית.');
                 window.open('{shufersal_quick_order_url}', '_blank');
             " style="
                 background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -868,18 +782,8 @@ with tab_shopping:
         components.html(magic_button_html, height=85)
     else:
         st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין עגלה!")
-    for idx, shop_item in enumerate(st.session_state.shopping_list):
-        s_c1, s_c2, s_c3 = st.columns([4, 2, 2])
-        with s_c1:
-            st.session_state.shopping_list[idx]["checked"] = st.checkbox(shop_item["item"], value=shop_item["checked"], key=f"shop_chk_{idx}")
-        with s_c2:
-            shuf_url = f"https://www.shufersal.co.il/online/he/search?text={urllib.parse.quote(shop_item['search'])}"
-            st.markdown(f'<a href="{shuf_url}" target="_blank" class="quick-shop-btn">חפש בשופרסל 🔍</a>', unsafe_allow_html=True)
-        with s_c3:
-            rami_url = f"https://www.rami-levy.co.il/he/online/search?q={urllib.parse.quote(shop_item['search'])}"
-            st.markdown(f'<a href="{rami_url}" target="_blank" class="quick-shop-btn">רמי לוי 🛒</a>', unsafe_allow_html=True)
 
-# --- טאב 8: מרכז אימונים וקיר שיאים (PR) ---
+# --- טאב 8: מרכז אימונים ו-PR ---
 with tab_workout:
     st.subheader("🏋️ מרכז אימונים אישי וקיר שיאים (נשמר ב-SQLite)")
 
