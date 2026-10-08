@@ -667,8 +667,7 @@ with tab_ai_cam:
                         }
                         """
                         res = client.models.generate_content(
-                           model="gemini-2.5-flash",
-                            contents=[prompt, pil_img]
+model="gemini-3.8-flash",                            contents=[prompt, pil_img]
                         )
                         cleaned = res.text.strip().replace("```json", "").replace("```", "").strip()
                         food_info = json.loads(cleaned)
