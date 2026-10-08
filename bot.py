@@ -7,6 +7,7 @@ import json
 from datetime import date
 from PIL import Image
 from google import genai
+import pandas as pd
 
 st.set_page_config(
     page_title="DaniFit Pro | פלטפורמת כושר ותזונה מתקדמת",
@@ -78,7 +79,7 @@ def save_today_data(water_ml, extra_burned, logged_items):
 def load_prs():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    c.execute("SELECT id, exercise, weight, reps, custom_res, date_recorded FROM pr_records ORDER BY id DESC")
+    c.execute("SELECT id, exercise, weight, reps, custom_res, date_recorded FROM pr_records ORDER BY id ASC")
     rows = c.fetchall()
     conn.close()
     prs = []
@@ -329,7 +330,7 @@ st.markdown("""
     <div class="brand-subtitle">הפלטפורמה המקצועית והחכמה לתזונה, חיטוב וכושר שיא</div>
     <div class="brand-description">
         מערכת מתקדמת עם שמירת נתונים קבועה: מעקב קלוריות חכם, סריקת מנות במצלמת AI,
-        הכנת עגלת קניות ישירה לשופרסל, כרטיסיית הישגים לסטורי, סעודות שבת ומרכז אימוני כוח.
+        רשימת קניות לשופרסל, כרטיסיית הישגים להורדה, טיימר מנוחה ומרכז אימוני כוח עם גרפי PR.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -614,23 +615,38 @@ with tab_ai_cam:
                 time.sleep(1)
                 st.rerun()
 
-# --- טאב 4: כרטיסיית סטורי ---
+# --- טאב 4: כרטיסיית סטורי עם אפשרות שיתוף/הורדה ---
 with tab_story:
     st.subheader("📲 הפקת כרטיסיית הישגים שבועית לסטורי")
-    st.markdown("""
-    <div class="story-card">
-        <h2 style="color: #38bdf8; margin: 0; font-size: 2rem;">⚡ DANIFIT PRO</h2>
-        <p style="color: #94a3b8; margin-top: 4px;">סיכום ביצועים שבועי</p>
+    st.caption("שתף את כרטיסיית ההישגים שלך ישירות באינסטגרם או וואטסאפ:")
+
+    story_html = """
+    <div id="story-capture" style="
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #ffffff;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        max-width: 440px;
+        margin: 0 auto;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.3);
+        border: 2px solid #38bdf8;
+        font-family: sans-serif;
+        direction: rtl;
+    ">
+        <h2 style="color: #38bdf8; margin: 0; font-size: 2.2rem; font-weight: 900;">⚡ DANIFIT PRO</h2>
+        <p style="color: #94a3b8; margin-top: 4px; font-weight: 600;">סיכום שבועי רשמי</p>
         <hr style="border-color: #334155; margin: 20px 0;">
-        <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 12px;">🔥 5 אימונים הושלמו בהצלחה</div>
-        <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 12px;">🥩 100% עמידה ביעד החלבון השבועי</div>
-        <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 12px;">💧 ממוצע 3.2 ליטר מים ביום</div>
-        <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;">🏆 שיא אישי חדש (PR) נשבר!</div>
-        <div style="background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; border-radius: 12px; padding: 10px; margin-top: 15px;">
-            <b style="color: #38bdf8;">משמעת מנצחת הכל 🦾</b>
+        <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 14px;">🔥 5 אימונים הושלמו בהצלחה</div>
+        <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 14px;">🥩 100% עמידה ביעד החלבון השבועי</div>
+        <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 14px;">💧 ממוצע 3.2 ליטר מים ביום</div>
+        <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 18px;">🏆 שיא אישי חדש נשבר!</div>
+        <div style="background: rgba(56, 189, 248, 0.15); border: 1px dashed #38bdf8; border-radius: 12px; padding: 12px; margin-top: 15px;">
+            <b style="color: #38bdf8; font-size: 1.15rem;">משמעת מנצחת הכל 🦾</b>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    components.html(story_html, height=360)
 
 # --- טאב 5: חימום ומתיחות ---
 with tab_warmup:
@@ -664,7 +680,7 @@ with tab_shabbat:
         f = round(data["f"] * shab_qty, 1)
         st.info(f"ערכי המנה: **{cal} קק\"ל** | חלבון: **{p}g** | פחמימות: **{c}g** | שומן: **{f}g**")
 
-# --- טאב 7: רשימת קניות והזמנה מהירה לשופרסל ---
+# --- טאב 7: רשימת קניות והזמנה לשופרסל ---
 with tab_shopping:
     st.subheader("🛒 רשימת קניות והזמנה מהירה לשופרסל")
     st.caption("סמן את המוצרים ולחץ על כפתור ההזמנה המהירה:")
@@ -750,10 +766,96 @@ with tab_shopping:
     else:
         st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין עגלה!")
 
-# --- טאב 8: מרכז אימונים ו-PR ---
+# --- טאב 8: מרכז אימונים, טיימר מנוחה, 1RM וגרפי שיאים ---
 with tab_workout:
-    st.subheader("🏋️ מרכז אימונים אישי וקיר שיאים (נשמר ב-SQLite)")
+    st.subheader("🏋️ מרכז אימונים, טיימר מנוחה וקיר שיאים (PR)")
 
+    # 1. טיימר מנוחה מובנה
+    st.markdown("### ⏱️ טיימר מנוחה מובנה בין סטים")
+    timer_html = """
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center; max-width: 480px; margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <div id="timer-display" style="font-size: 3rem; font-weight: 900; color: #2563eb; font-family: monospace;">01:30</div>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+            <button onclick="setTimer(60)" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">60 שניות</button>
+            <button onclick="setTimer(90)" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">90 שניות</button>
+            <button onclick="setTimer(120)" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">2 דקות</button>
+            <button onclick="setTimer(180)" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;">3 דקות</button>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+            <button onclick="startTimer()" style="background: #16a34a; border: none; color: white; padding: 10px 24px; border-radius: 10px; font-weight: 800; cursor: pointer;">▶️ התחל</button>
+            <button onclick="pauseTimer()" style="background: #f59e0b; border: none; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 800; cursor: pointer;">⏸️ השהה</button>
+            <button onclick="resetTimer()" style="background: #ef4444; border: none; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 800; cursor: pointer;">🔄 אפס</button>
+        </div>
+    </div>
+
+    <script>
+    let timeLeft = 90;
+    let initialTime = 90;
+    let timerId = null;
+
+    function updateDisplay() {
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        document.getElementById('timer-display').innerText = 
+            (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+
+    function setTimer(sec) {
+        clearInterval(timerId);
+        timerId = null;
+        initialTime = sec;
+        timeLeft = sec;
+        updateDisplay();
+    }
+
+    function startTimer() {
+        if (timerId !== null) return;
+        timerId = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateDisplay();
+            } else {
+                clearInterval(timerId);
+                timerId = null;
+                alert('⏰ סיום מנוחה! הגיע הזמן לסט הבא 🔥');
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(timerId);
+        timerId = null;
+    }
+
+    function resetTimer() {
+        clearInterval(timerId);
+        timerId = null;
+        timeLeft = initialTime;
+        updateDisplay();
+    }
+    </script>
+    """
+    components.html(timer_html, height=210)
+
+    # 2. מחשבון 1RM ועומסי עבודה
+    with st.expander("⚡ מחשבון 1RM (משקל מקסימלי לחזרה אחת) ואחוזי עבודה", expanded=False):
+        rm_c1, rm_c2 = st.columns(2)
+        with rm_c1:
+            rm_w = st.number_input("משקל שהורם (ק\"ג):", min_value=1.0, max_value=400.0, value=80.0, step=2.5)
+        with rm_c2:
+            rm_r = st.number_input("מספר חזרות שבוצעו:", min_value=1, max_value=20, value=6, step=1)
+        
+        # נוסחת Epley לחישוב 1RM
+        one_rm = round(rm_w * (1 + (rm_r / 30.0)), 1)
+        st.success(f"🏆 ה-1RM המשוער שלך: **{one_rm} ק\"ג**")
+        
+        st.markdown("**אחוזי עבודה מומלצים לאימון:**")
+        st.write(f"• **90% (כוח מרבי / 3-4 חזרות):** {round(one_rm * 0.90, 1)} ק\"ג")
+        st.write(f"• **80% (היפרטרופיה / 6-8 חזרות):** {round(one_rm * 0.80, 1)} ק\"ג")
+        st.write(f"• **70% (נפח וסיבולת / 10-12 חזרות):** {round(one_rm * 0.70, 1)} ק\"ג")
+
+    # 3. הוספת שיא אישי חדש
+    st.markdown("---")
     with st.expander("➕ הוסף שיא אישי חדש (PR)", expanded=True):
         p_c1, p_c2, p_c3, p_c4 = st.columns(4)
         with p_c1:
@@ -774,7 +876,15 @@ with tab_workout:
     if not current_prs:
         st.info("עדיין לא נרשמו שיאים. רשום את השיא הראשון שלך למעלה!")
     else:
-        for pr in current_prs:
+        # 4. גרף התקדמות שיאים
+        st.markdown("### 📈 גרף התקדמות שיאים לאורך זמן")
+        df_pr = pd.DataFrame(current_prs)
+        selected_ex = st.selectbox("בחר תרגיל להצגת גרף התקדמות:", list(df_pr["exercise"].unique()))
+        df_filtered = df_pr[df_pr["exercise"] == selected_ex]
+        st.line_chart(df_filtered.set_index("date")["weight"])
+
+        st.markdown("### 📋 היסטוריית שיאים")
+        for pr in reversed(current_prs):
             pr_box_c1, pr_box_c2 = st.columns([5, 1])
             with pr_box_c1:
                 st.markdown(f"""
