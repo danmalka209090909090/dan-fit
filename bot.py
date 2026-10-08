@@ -715,31 +715,38 @@ with tab_shopping:
     st.markdown("---")
 
     if selected_items:
-        items_payload = ",".join(selected_items)
-        shufersal_order_url = f"https://www.shufersal.co.il/online/he/quick-order?items={urllib.parse.quote(items_payload)}"
+        items_text_lines = "\\n".join(selected_items)
+        shufersal_wishlist_url = "https://www.shufersal.co.il/online/he/wish-lists"
 
         st.markdown(f"**נבחרו {len(selected_items)} מוצרים:**")
         st.info(", ".join(selected_items))
 
-        st.markdown(f"""
+        magic_button_html = f"""
         <div style="margin-top: 15px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 14px; text-align: center;">
             <h3 style="margin: 0 0 10px 0; color: #166534; border: none; padding: 0;">🚀 הזמנה ישירה לשופרסל</h3>
             <p style="margin: 0 0 16px 0; color: #374151; font-size: 1.05rem;">
-                לחיצה תעביר את כל המוצרים ישירות לעמוד ההזמנה המהירה של שופרסל:
+                לחיצה אחת מעתיקה את כל המוצרים ופותחת את עמוד הרשימות של שופרסל:
             </p>
-            <a href="{shufersal_order_url}" target="_blank" style="
+            <button onclick="
+                navigator.clipboard.writeText(`{items_text_lines}`);
+                window.open('{shufersal_wishlist_url}', '_blank');
+            " style="
                 background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
                 color: white;
-                text-decoration: none;
+                border: none;
                 padding: 16px 36px;
                 font-size: 1.25rem;
                 font-weight: 800;
                 border-radius: 14px;
-                display: inline-block;
+                cursor: pointer;
                 box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35);
-            ">🛒 פתח עגלה מהירה בשופרסל</a>
+                font-family: inherit;
+            ">
+                🛒 פתח רשימה בשופרסל
+            </button>
         </div>
-        """, unsafe_allow_html=True)
+        """
+        components.html(magic_button_html, height=160)
     else:
         st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין עגלה!")
 
