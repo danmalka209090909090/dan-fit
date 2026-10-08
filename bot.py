@@ -767,11 +767,107 @@ with tab_shabbat:
         f = round(data["f"] * shab_qty, 1)
         st.info(f"ערכי המנה: **{cal} קק\"ל** | חלבון: **{p}g** | פחמימות: **{c}g** | שומן: **{f}g**")
 
-# --- טאב 7: רשימת קניות לסופר ---
+# --- טאב 7: רשימת קניות לסופר ---# --- טאב 7: רשימת קניות חכמה והכנת עגלה לשופרסל ---
 with tab_shopping:
-    st.subheader("🛒 רשימת קניות חכמה והזמנה מהירה לסופר")
-    st.caption("סמן מוצרים שחסרים לך והזמן אותם ישירות בלחיצה אחת לאתרי האונליין:")
+    st.subheader("🛒 רשימת קניות חכמה והכנת עגלה אוטומטית")
+    st.caption("סמן את המצרכים שאתה צריך, והמערכת תכין את העגלה בשופרסל בלחיצה אחת!")
 
+    # הוספת מוצר חדש לרשימה
+    with st.expander("➕ הוסף מוצר חדש לרשימה", expanded=False):
+        n_c1, n_c2 = st.columns([3, 1])
+        with n_c1:
+            new_item_name = st.text_input("שם המוצר:", placeholder="לדוגמה: יוגורט דנונה פרו 20 גרם", key="new_shop_inp")
+        with n_c2:
+            st.write("")
+            st.write("")
+            if st.button("הוסף ➕", key="btn_add_new_shop"):
+                if new_item_name.strip():
+                    st.session_state.shopping_list.append({
+                        "item": new_item_name.strip(),
+                        "search": new_item_name.strip(),
+                        "checked": True
+                    })
+                    st.rerun()
+
+    # הצגת המוצרים עם תיבות סימון
+    col_sel_all, col_desel_all = st.columns(2)
+    with col_sel_all:
+        if st.button("✅ בחר הכל"):
+            for itm in st.session_state.shopping_list:
+                itm["checked"] = True
+            st.rerun()
+    with col_desel_all:
+        if st.button("❌ בטל בחירה של הכל"):
+            for itm in st.session_state.shopping_list:
+                itm["checked"] = False
+            st.rerun()
+
+    st.markdown("---")
+
+    selected_items = []
+    for idx, shop_item in enumerate(st.session_state.shopping_list):
+        c_chk, c_del = st.columns([5, 1])
+        with c_chk:
+            is_chk = st.checkbox(shop_item["item"], value=shop_item["checked"], key=f"shop_chk_{idx}")
+            st.session_state.shopping_list[idx]["checked"] = is_chk
+            if is_chk:
+                selected_items.append(shop_item["search"])
+        with c_del:
+            if st.button("🗑️", key=f"del_shop_{idx}"):
+                st.session_state.shopping_list.pop(idx)
+                st.rerun()
+
+    st.markdown("---")
+
+    # ריכוז המוצרים שנבחרו להזמנה
+    if selected_items:
+        items_text_lines = "\\n".join(selected_items)
+        shufersal_quick_order_url = "https://www.shufersal.co.il/online/he/wish-lists"
+        
+        st.markdown(f"**נבחרו {len(selected_items)} מוצרים להזמנה:**")
+        st.info(", ".join(selected_items))
+
+        # כפתור חכם שמבצע העתקה ומעביר לעמוד הכנת הרשימה של שופרסל
+        magic_button_html = f"""
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
+            <button onclick="
+                navigator.clipboard.writeText(`{items_text_lines}`);
+                alert('הרשימה הועתקה ללוח! בלשונית שופרסל שתיפתח - לחץ הדבק (Paste) והעגלה תתמלא אוטומטית.');
+                window.open('{shufersal_quick_order_url}', '_blank');
+            " style="
+                background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+                color: white;
+                border: none;
+                padding: 14px 24px;
+                font-size: 1.1rem;
+                font-weight: 800;
+                border-radius: 12px;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+                font-family: inherit;
+            ">
+                🚀 הכן עגלה מהירה בשופרסל בלחיצה
+            </button>
+            
+            <a href="https://wa.me/?text={urllib.parse.quote('רשימת קניות מ-DaniFit:\\n' + chr(10).join(selected_items))}" target="_blank" style="
+                background: #25d366;
+                color: white;
+                text-decoration: none;
+                padding: 14px 20px;
+                font-size: 1.05rem;
+                font-weight: 700;
+                border-radius: 12px;
+                display: inline-flex;
+                align-items: center;
+                box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+            ">
+                📲 שלח רשימה לוואטסאפ
+            </a>
+        </div>
+        """
+        components.html(magic_button_html, height=85)
+    else:
+        st.warning("לא סומנו מוצרים. סמן לפחות מוצר אחד כדי להכין עגלה!")
     for idx, shop_item in enumerate(st.session_state.shopping_list):
         s_c1, s_c2, s_c3 = st.columns([4, 2, 2])
         with s_c1:
